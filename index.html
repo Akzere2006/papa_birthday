@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>С днём рождения, папа! 🎂</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f1ec;--fg:#1d1d1b;--muted:#6b6a64;--accent:#0a7d4f;--term:#11151a;--termfg:#d7dee6}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0d10;--fg:#eceae4;--muted:#9a9890;--accent:#3ddc97;--term:#161b22;--termfg:#d7dee6}}
+:root[data-theme="dark"]{--bg:#0b0d10;--fg:#eceae4;--muted:#9a9890;--accent:#3ddc97;--term:#161b22;--termfg:#d7dee6}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.term{width:100%;max-width:640px;background:var(--term);color:var(--termfg);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.25);overflow:hidden}
+.bar{display:flex;gap:7px;padding:12px 14px;background:rgba(255,255,255,.06)}
+.bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.bar i:nth-child(2){background:#febc2e}.bar i:nth-child(3){background:#28c840}
+#out{padding:18px;min-height:280px;font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.ok{color:#3ddc97}.dim{color:#7d8793}.hl{color:#ffd166}
+.cur{display:inline-block;width:8px;height:1em;background:#3ddc97;vertical-align:-2px;animation:b 1s steps(1) infinite}
+@keyframes b{50%{opacity:0}}
+#final{text-align:center;margin-top:28px;opacity:0;transform:translateY(12px);transition:all .8s;max-width:640px}
+#final.show{opacity:1;transform:none}
+#final h1{font-size:clamp(26px,7vw,44px);margin:0 0 8px;color:var(--accent)}
+#final p{margin:4px 0;color:var(--muted)}
+button{margin-top:18px;font:inherit;background:none;color:var(--fg);border:1px solid var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer}
+canvas{position:fixed;inset:0;pointer-events:none;width:100%;height:100%}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="term"><div class="bar"><i></i><i></i><i></i></div><div id="out"></div></div>
+<div id="final">
+<h1 id="h">С днём рождения, папа!</h1>
+<p>Туған күніңмен, әке! 🎂</p>
+<p id="from"></p>
+<button id="again">▶ запустить снова</button>
+</div>
+<script>
+// Параметры можно менять прямо в ссылке: ?age=50&from=Айдар
+var q=new URLSearchParams(location.search);
+var AGE=parseInt(q.get("age"))||0, FROM=q.get("from")||"";
+var out=document.getElementById("out"),fin=document.getElementById("final");
+var v=AGE?("v"+AGE+".0"):"v+1";
+var L=[
+["$ ./birthday.sh --target papa","",400],
+["Загрузка модулей...","dim",500],
+["[ OK ] мудрость.......... загружена","ok",350],
+["[ OK ] терпение.......... безлимит","ok",350],
+["[ OK ] шутки............. не смешные, но работают","ok",350],
+["[ OK ] надёжность........ 99.999% аптайм","ok",350],
+["[WARN] не умеет отдыхать","hl",500],
+["[FIX ] назначен отдых: сегодня, без вариантов","ok",500],
+["","",200],
+["Сборка релиза Папа "+v+" ...","dim",900],
+["Тесты пройдены: 0 багов, 1 лучший отец","ok",600],
+["","",200],
+["$ echo \"Спасибо за всё\"","",500],
+["Спасибо за всё","hl",400]
+];
+var timers=[],raf;
+function type(s,cls,done){var d=document.createElement("div");if(cls)d.className=cls;out.appendChild(d);var i=0;
+(function t(){d.textContent=s.slice(0,++i);if(i<s.length)timers.push(setTimeout(t,s[0]==="$"?45:14));else done()})()}
+function run(){
+timers.forEach(clearTimeout);cancelAnimationFrame(raf);out.innerHTML="";fin.classList.remove("show");
+document.getElementById("h").textContent="С днём рождения, папа!"+(AGE?" "+AGE+" 🎉":"");
+document.getElementById("from").textContent=FROM?"— твой(я) "+FROM+" ❤️":"Люблю тебя ❤️";
+var i=0;(function n(){if(i>=L.length){var c=document.createElement("span");c.className="cur";out.appendChild(c);
+timers.push(setTimeout(function(){fin.classList.add("show");boom()},600));return}
+var l=L[i++];if(!l[0]){out.appendChild(document.createElement("br"));timers.push(setTimeout(n,l[2]));return}
+type(l[0],l[1],function(){timers.push(setTimeout(n,l[2]))})})()}
+function boom(){var cv=document.getElementById("c"),x=cv.getContext("2d");cv.width=innerWidth;cv.height=innerHeight;
+var cols=["#ff5f57","#febc2e","#3ddc97","#4cc9f0","#c77dff"],P=[];
+for(var i=0;i<160;i++)P.push({x:cv.width/2,y:cv.height*.45,vx:(Math.random()-.5)*14,vy:Math.random()*-14-3,s:4+Math.random()*5,c:cols[i%5],r:Math.random()*6});
+var f=0;(function a(){x.clearRect(0,0,cv.width,cv.height);P.forEach(function(p){p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.r+=.15;
+x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+if(++f<200)raf=requestAnimationFrame(a);else x.clearRect(0,0,cv.width,cv.height)})()}
+document.getElementById("again").onclick=run;
+run();
+</script>
+</body>
+</html>
